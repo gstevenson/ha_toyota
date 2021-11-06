@@ -1,5 +1,8 @@
 """Config flow for Toyota Connected Services integration."""
+from __future__ import annotations
+
 import logging
+from typing import Optional
 
 from mytoyota.client import MyT
 from mytoyota.exceptions import (
@@ -11,8 +14,10 @@ from mytoyota.exceptions import (
 import voluptuous as vol
 
 from homeassistant import config_entries
+from homeassistant.config_entries import ConfigEntry
 from homeassistant.const import CONF_EMAIL, CONF_PASSWORD, CONF_REGION
 from homeassistant.core import callback
+from homeassistant.data_entry_flow import FlowResult
 
 # https://github.com/PyCQA/pylint/issues/3202
 from .const import (  # pylint: disable=unused-import
@@ -21,7 +26,7 @@ from .const import (  # pylint: disable=unused-import
     DOMAIN,
 )
 
-_LOGGER = logging.getLogger(__name__)
+_LOGGER: logging.Logger = logging.getLogger(__package__)
 
 supported_regions = MyT.get_supported_regions()
 
@@ -36,13 +41,12 @@ DATA_SCHEMA = vol.Schema(
 )
 
 
-class ToyotaConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
+class ToyotaConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):  # type: ignore
     """Handle a config flow for Toyota Connected Services."""
 
     VERSION = 1
-    CONNECTION_CLASS = config_entries.CONN_CLASS_CLOUD_POLL
 
-    async def async_step_user(self, user_input=None):
+    async def async_step_user(self, user_input: Optional[dict] = None) -> FlowResult:
         """Handle the initial step."""
         errors = {}
 
@@ -87,20 +91,20 @@ class ToyotaConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
 
     @staticmethod
     @callback
-    def async_get_options_flow(config_entry):
+    def async_get_options_flow(config_entry: ConfigEntry) -> ToyotaOptionsFlowHandler:
         return ToyotaOptionsFlowHandler(config_entry)
 
 
 class ToyotaOptionsFlowHandler(config_entries.OptionsFlow):
     """Config flow options handler for Toyota Connected Services."""
 
-    def __init__(self, config_entry):
+    def __init__(self, config_entry: ConfigEntry):
         """Initialize options flow."""
         self.config_entry = config_entry
         # Cast from MappingProxy to dict to allow update.
         self.options = dict(config_entry.options)
 
-    async def async_step_init(self, user_input=None):
+    async def async_step_init(self, user_input: Optional[dict] = None) -> FlowResult:
         """Manage the options."""
         if user_input is not None:
             self.options.update(user_input)

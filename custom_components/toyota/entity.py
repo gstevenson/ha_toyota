@@ -1,9 +1,16 @@
 """Custom coordinator entity base classes for Toyota Connected Services integration"""
 
 from datetime import timedelta
+from typing import Optional
+
+from mytoyota.vehicle import Vehicle
 
 from homeassistant.components.sensor import STATE_CLASS_MEASUREMENT, SensorEntity
-from homeassistant.helpers.update_coordinator import CoordinatorEntity
+from homeassistant.helpers.entity import DeviceInfo
+from homeassistant.helpers.update_coordinator import (
+    CoordinatorEntity,
+    DataUpdateCoordinator,
+)
 
 from .const import (
     AVERAGE_SPEED,
@@ -36,7 +43,9 @@ class ToyotaBaseEntity(CoordinatorEntity):
 
     _attr_state_class = STATE_CLASS_MEASUREMENT
 
-    def __init__(self, coordinator, index, sensor_name):
+    def __init__(
+        self, coordinator: DataUpdateCoordinator, index: int, sensor_name: str
+    ) -> None:
         """Initialize the Toyota entity."""
         super().__init__(coordinator)
         self.index = index
@@ -45,7 +54,7 @@ class ToyotaBaseEntity(CoordinatorEntity):
         self.vehicle = self.coordinator.data[self.index]
 
     @property
-    def device_info(self):
+    def device_info(self) -> Optional[DeviceInfo]:
         """Return device info for the Toyota entity."""
         return {
             "identifiers": {(DOMAIN, self.vehicle.vin)},
@@ -55,12 +64,12 @@ class ToyotaBaseEntity(CoordinatorEntity):
         }
 
     @property
-    def name(self):
+    def name(self) -> Optional[str]:
         """Return the name of the sensor."""
         return f"{self.vehicle.alias} {self.sensor_name}"
 
     @property
-    def unique_id(self):
+    def unique_id(self) -> Optional[str]:
         """Return a unique identifier for this entity."""
         return f"{self.vehicle.vin}/{self.name}"
 
@@ -71,14 +80,14 @@ class StatisticsBaseEntity(ToyotaBaseEntity, SensorEntity):
     _attr_icon = ICON_HISTORY
 
     @property
-    def native_unit_of_measurement(self):
+    def native_unit_of_measurement(self) -> Optional[str]:
         """Return the unit of measurement."""
         return self.vehicle.odometer.unit
 
-    def get_statistics_attributes(self, statistics):
+    def get_statistics_attributes(self, statistics: dict) -> dict:
         """Formats and returns statistics attributes."""
 
-        def get_timedelta(time):
+        def get_timedelta(time: int) -> str:
             return str(timedelta(seconds=time))
 
         attr = {

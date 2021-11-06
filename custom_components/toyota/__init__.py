@@ -34,13 +34,13 @@ from .const import (
     STARTUP_MESSAGE,
 )
 
-_LOGGER = logging.getLogger(__name__)
+_LOGGER: logging.Logger = logging.getLogger(__package__)
 
 # Update sensors every 5 minutes
 UPDATE_INTERVAL = timedelta(seconds=90)
 
 
-async def with_timeout(task, timeout_seconds=15):
+async def with_timeout(task, timeout_seconds: int = 15):
     """Run an async task with a timeout."""
     async with async_timeout.timeout(timeout_seconds):
         return await task
@@ -75,7 +75,7 @@ async def async_setup_entry(  # pylint: disable=too-many-statements
             "Unable to connect to Toyota Connected Services"
         ) from ex
 
-    async def async_update_data():
+    async def async_update_data() -> list:  # type: ignore
         """Fetch data from Toyota API."""
 
         try:
@@ -165,7 +165,7 @@ async def async_setup_entry(  # pylint: disable=too-many-statements
     return True
 
 
-async def async_unload_entry(hass: HomeAssistant, entry: ConfigEntry):
+async def async_unload_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
     """Unload a config entry."""
     unload_ok = await hass.config_entries.async_unload_platforms(entry, PLATFORMS)
 

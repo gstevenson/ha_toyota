@@ -1,5 +1,4 @@
 """Binary sensor platform for Toyota integration"""
-
 from homeassistant.components.binary_sensor import (
     DEVICE_CLASS_DOOR,
     DEVICE_CLASS_LIGHT,
@@ -7,6 +6,9 @@ from homeassistant.components.binary_sensor import (
     DEVICE_CLASS_WINDOW,
     BinarySensorEntity,
 )
+from homeassistant.config_entries import ConfigEntry
+from homeassistant.core import HomeAssistant
+from homeassistant.helpers.entity_platform import AddEntitiesCallback
 
 from .const import (
     DATA_COORDINATOR,
@@ -23,8 +25,12 @@ from .const import (
 from .entity import ToyotaBaseEntity
 
 
-async def async_setup_entry(hass, config_entry, async_add_devices):
-    """Set up the sensor platform."""
+async def async_setup_entry(
+    hass: HomeAssistant,
+    config_entry: ConfigEntry,
+    async_add_devices: AddEntitiesCallback,
+) -> bool:
+    """Set up the binary_sensor platform."""
     binary_sensors = []
 
     coordinator = hass.data[DOMAIN][config_entry.entry_id][DATA_COORDINATOR]
@@ -127,6 +133,8 @@ async def async_setup_entry(hass, config_entry, async_add_devices):
 
     async_add_devices(binary_sensors, True)
 
+    return True
+
 
 class ToyotaHoodBinarySensor(ToyotaBaseEntity, BinarySensorEntity):
     """Class for the hood sensor"""
@@ -135,7 +143,7 @@ class ToyotaHoodBinarySensor(ToyotaBaseEntity, BinarySensorEntity):
     _attr_icon = ICON_CAR_DOOR
 
     @property
-    def extra_state_attributes(self):
+    def extra_state_attributes(self) -> dict:
         """Return the state attributes."""
         return {
             WARNING: self.coordinator.data[self.index].sensors.hood.warning,
@@ -143,7 +151,7 @@ class ToyotaHoodBinarySensor(ToyotaBaseEntity, BinarySensorEntity):
         }
 
     @property
-    def is_on(self):
+    def is_on(self) -> bool:
         """Return true if the hood is open."""
         return not self.coordinator.data[self.index].sensors.hood.closed
 
@@ -155,7 +163,7 @@ class ToyotaDoorBinarySensor(ToyotaBaseEntity, BinarySensorEntity):
     _attr_icon = ICON_CAR_DOOR
 
     @property
-    def extra_state_attributes(self):
+    def extra_state_attributes(self) -> dict:
         """Return the state attributes."""
 
         door = getattr(
@@ -169,7 +177,7 @@ class ToyotaDoorBinarySensor(ToyotaBaseEntity, BinarySensorEntity):
         }
 
     @property
-    def is_on(self):
+    def is_on(self) -> bool:
         """Return true if the door is open."""
 
         door = getattr(
@@ -187,7 +195,7 @@ class ToyotaDoorLockBinarySensor(ToyotaBaseEntity, BinarySensorEntity):
     _attr_icon = ICON_CAR_DOOR_LOCK
 
     @property
-    def extra_state_attributes(self):
+    def extra_state_attributes(self) -> dict:
         """Return the state attributes."""
 
         door = getattr(
@@ -201,7 +209,7 @@ class ToyotaDoorLockBinarySensor(ToyotaBaseEntity, BinarySensorEntity):
         }
 
     @property
-    def is_on(self):
+    def is_on(self) -> bool:
         """Return true if the door is unlocked."""
 
         door = getattr(
@@ -218,14 +226,14 @@ class ToyotaKeyBinarySensor(ToyotaBaseEntity, BinarySensorEntity):
     _attr_icon = ICON_KEY
 
     @property
-    def extra_state_attributes(self):
+    def extra_state_attributes(self) -> dict:
         """Return the state attributes."""
         return {
             WARNING: self.coordinator.data[self.index].sensors.key.warning,
         }
 
     @property
-    def is_on(self):
+    def is_on(self) -> bool:
         """Return true if key is in car."""
         return self.coordinator.data[self.index].sensors.key.in_car
 
@@ -237,7 +245,7 @@ class ToyotaLightBinarySensor(ToyotaBaseEntity, BinarySensorEntity):
     _attr_icon = ICON_CAR_LIGHTS
 
     @property
-    def extra_state_attributes(self):
+    def extra_state_attributes(self) -> dict:
         """Return the state attributes."""
 
         light = getattr(
@@ -251,7 +259,7 @@ class ToyotaLightBinarySensor(ToyotaBaseEntity, BinarySensorEntity):
         }
 
     @property
-    def is_on(self):
+    def is_on(self) -> bool:
         """Return true if light is on."""
 
         light = getattr(
@@ -268,7 +276,7 @@ class ToyotaOverAllStatusBinarySensor(ToyotaBaseEntity, BinarySensorEntity):
     _attr_device_class = DEVICE_CLASS_PROBLEM
 
     @property
-    def extra_state_attributes(self):
+    def extra_state_attributes(self) -> dict:
         """Return the state attributes."""
 
         return {
@@ -276,7 +284,7 @@ class ToyotaOverAllStatusBinarySensor(ToyotaBaseEntity, BinarySensorEntity):
         }
 
     @property
-    def is_on(self):
+    def is_on(self) -> bool:
         """Return true if a overallstatus is not OK."""
 
         return not self.coordinator.data[self.index].sensors.overallstatus == "OK"
@@ -288,7 +296,7 @@ class ToyotaWindowBinarySensor(ToyotaBaseEntity, BinarySensorEntity):
     _attr_device_class = DEVICE_CLASS_WINDOW
 
     @property
-    def extra_state_attributes(self):
+    def extra_state_attributes(self) -> dict:
         """Return the state attributes."""
 
         window = getattr(
@@ -302,7 +310,7 @@ class ToyotaWindowBinarySensor(ToyotaBaseEntity, BinarySensorEntity):
         }
 
     @property
-    def is_on(self):
+    def is_on(self) -> bool:
         """Return true if the window is down."""
 
         window = getattr(
@@ -322,7 +330,7 @@ class ToyotaFrontDefoggerSensor(ToyotaBaseEntity, BinarySensorEntity):
     _attr_icon = ICON_FRONT_DEFOGGER
 
     @property
-    def is_on(self):
+    def is_on(self) -> bool:
         """Return true if the defogger is on."""
 
         return self.coordinator.data[self.index].hvac.front_defogger
@@ -334,7 +342,7 @@ class ToyotaRearDefoggerSensor(ToyotaBaseEntity, BinarySensorEntity):
     _attr_icon = ICON_REAR_DEFOGGER
 
     @property
-    def is_on(self):
+    def is_on(self) -> bool:
         """Return true if the defogger is on."""
 
         return self.coordinator.data[self.index].hvac.front_defogger

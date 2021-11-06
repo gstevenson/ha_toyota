@@ -1,6 +1,9 @@
 """Sensor platform for Toyota sensor integration."""
+from typing import Optional
+
 import arrow
 
+from homeassistant.config_entries import ConfigEntry
 from homeassistant.const import (
     DEVICE_CLASS_TEMPERATURE,
     PERCENTAGE,
@@ -8,6 +11,8 @@ from homeassistant.const import (
     STATE_UNKNOWN,
     TEMP_CELSIUS,
 )
+from homeassistant.core import HomeAssistant
+from homeassistant.helpers.entity_platform import AddEntitiesCallback
 from homeassistant.helpers.typing import StateType
 
 from .const import (
@@ -31,7 +36,11 @@ from .const import (
 from .entity import StatisticsBaseEntity, ToyotaBaseEntity
 
 
-async def async_setup_entry(hass, config_entry, async_add_devices):
+async def async_setup_entry(
+    hass: HomeAssistant,
+    config_entry: ConfigEntry,
+    async_add_devices: AddEntitiesCallback,
+) -> bool:
     """Set up the sensor platform."""
     sensors = []
 
@@ -83,6 +92,8 @@ async def async_setup_entry(hass, config_entry, async_add_devices):
 
     async_add_devices(sensors, True)
 
+    return True
+
 
 class ToyotaCarSensor(ToyotaBaseEntity):
     """Class for car details and numberplate sensor."""
@@ -90,7 +101,7 @@ class ToyotaCarSensor(ToyotaBaseEntity):
     _attr_icon = ICON_CAR
 
     @property
-    def extra_state_attributes(self):
+    def extra_state_attributes(self) -> dict:
         """Return the state attributes."""
         return self.coordinator.data[self.index].details
 
@@ -110,7 +121,7 @@ class ToyotaOdometerSensor(ToyotaBaseEntity):
     _attr_icon = ICON_ODOMETER
 
     @property
-    def unit_of_measurement(self):
+    def unit_of_measurement(self) -> Optional[str]:
         """Return the unit of measurement."""
         return self.vehicle.odometer.unit
 
@@ -148,7 +159,7 @@ class ToyotaFuelRemainingSensor(ToyotaBaseEntity):
     _attr_unit_of_measurement = PERCENTAGE
 
     @property
-    def extra_state_attributes(self):
+    def extra_state_attributes(self) -> dict:
         """Return the state attributes."""
         return {
             FUEL_TYPE: self.vehicle.energy.type,
@@ -166,12 +177,12 @@ class ToyotaRangeSensor(ToyotaBaseEntity):
     _attr_icon = ICON_RANGE
 
     @property
-    def unit_of_measurement(self):
+    def unit_of_measurement(self) -> Optional[str]:
         """Return the unit of measurement."""
         return self.vehicle.odometer.unit
 
     @property
-    def extra_state_attributes(self):
+    def extra_state_attributes(self) -> dict:
         """Return the state attributes."""
         return {
             "Range_with_aircon_on": self.coordinator.data[
@@ -181,7 +192,7 @@ class ToyotaRangeSensor(ToyotaBaseEntity):
         }
 
     @property
-    def state(self):
+    def state(self) -> StateType:
         """Return remaining range."""
 
         return self.coordinator.data[self.index].energy.range
@@ -193,7 +204,7 @@ class ToyotaEVSensor(ToyotaBaseEntity):
     _attr_icon = ICON_EV
 
     @property
-    def extra_state_attributes(self):
+    def extra_state_attributes(self) -> dict:
         """Return the state attributes."""
 
         attribute = {
@@ -214,7 +225,7 @@ class ToyotaEVSensor(ToyotaBaseEntity):
         return attribute
 
     @property
-    def state(self):
+    def state(self) -> StateType:
         """Return battery information for EV's."""
 
         return self.coordinator.data[self.index].energy.chargeinfo.get("status", None)
@@ -227,7 +238,7 @@ class ToyotaHVACSensor(ToyotaBaseEntity):
     _attr_native_unit_of_measurement = TEMP_CELSIUS
 
     @property
-    def extra_state_attributes(self):
+    def extra_state_attributes(self) -> dict:
         """Return the state attributes."""
 
         hvac = self.coordinator.data[self.index].hvac
@@ -259,7 +270,7 @@ class ToyotaHVACSensor(ToyotaBaseEntity):
         return attributes
 
     @property
-    def native_value(self):
+    def native_value(self) -> StateType:
         """Return current temperature."""
         return self.coordinator.data[self.index].hvac.current_temperature
 
@@ -271,7 +282,7 @@ class ToyotaTargetTemperatureSensor(ToyotaBaseEntity):
     _attr_native_unit_of_measurement = TEMP_CELSIUS
 
     @property
-    def native_value(self):
+    def native_value(self) -> StateType:
         """Return current temperature."""
         return self.coordinator.data[self.index].hvac.target_temperature
 
@@ -280,7 +291,7 @@ class ToyotaCurrentWeekSensor(StatisticsBaseEntity):
     """Class for current week statistics sensor."""
 
     @property
-    def extra_state_attributes(self):
+    def extra_state_attributes(self) -> dict:
         """Return the state attributes."""
         data = self.coordinator.data[self.index].statistics.weekly[0]
         from_dt = arrow.now().floor("week").format("YYYY-MM-DD")
@@ -311,7 +322,7 @@ class ToyotaCurrentMonthSensor(StatisticsBaseEntity):
     """Class for current month statistics sensor."""
 
     @property
-    def extra_state_attributes(self):
+    def extra_state_attributes(self) -> dict:
         """Return the state attributes."""
         data = self.coordinator.data[self.index].statistics.monthly[0]
         from_month = arrow.now().floor("month").format("MMMM")
@@ -337,7 +348,7 @@ class ToyotaCurrentYearSensor(StatisticsBaseEntity):
     """Class for current year statistics sensor."""
 
     @property
-    def extra_state_attributes(self):
+    def extra_state_attributes(self) -> dict:
         """Return the state attributes."""
         data = self.coordinator.data[self.index].statistics.yearly[0]
         from_year = arrow.now().floor("year").format("YYYY")
