@@ -36,7 +36,7 @@ from .const import (
 
 _LOGGER = logging.getLogger(__name__)
 
-# Update sensors every 5 minutes
+# Update sensors every 10 minutes
 UPDATE_INTERVAL = timedelta(minutes=10)
 
 
